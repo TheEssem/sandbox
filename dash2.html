@@ -11,12 +11,37 @@
   <meta property="article:author" content="https://twitter.com/TheEssem">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/2.9.3/dash.all.min.js"></script>
   <style>
-    video {
-      width: 640px;
-      height: 360px;
-    }
 
-    .player__button,
+    /* GENERAL STYLING: NOT NECESSARY */
+
+html {
+ box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+ box-sizing: inherit;
+}
+
+body {
+ margin: 0;
+ padding: 0;
+ display: flex;
+ flex-flow: column;
+ background: #7a419b;
+ min-height: 100vh;
+ background: linear-gradient(135deg, #7c1599 0%, #921099 48%, #7e4ae8 100%);
+ background-size: cover;
+ align-items: center;
+ justify-content: center;
+}
+
+/* END OF GENERAL STYLING */
+
+/* START OF USEFUL CODE */
+
+.player__button,
 .player__slider,
 .player__select {
  text-align-last: right;
@@ -50,24 +75,33 @@
  z-index: 1;
 }
 
-/*.code {
+.player {
+ min-width: 750px;
+ border: 5px solid rgba(0, 0, 0, 0.2);
+ box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
  position: relative;
  font-size: 0;
  overflow: hidden;
-}*/
+}
 
-.controls {
+.player__video {
+ width: 100%;
+}
+
+.player__controls {
  display: flex;
  flex-wrap: wrap;
  justify-content: space-between;
  position: absolute;
+ bottom: 0;
+ width: 100%;
  transform: translateY(100%) translateY(-5px);
  transition: all 0.3s;
  background: rgba(0, 0, 0, 0.8);
  z-index: 2147483647;
 }
 
-.controls--visible {
+.player__controls--visible {
  transform: translateY(0);
 }
 
@@ -90,7 +124,7 @@
 
 .progress__filled {
  width: 50%;
- background: #000cff;
+ background: #ffc600;
  flex: 0;
  flex-basis: 0%;
 }
@@ -112,13 +146,83 @@
 .player__select > option {
  background-color: #000;
 }
+
+/* unholy css to style input type="range" */
+
+input[type="range"] {
+ -webkit-appearance: none;
+ background: transparent;
+ width: 100%;
+ margin: 0 5px;
+}
+
+input[type="range"]:focus {
+ outline: none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+ width: 100%;
+ height: 8.4px;
+ cursor: pointer;
+ box-shadow: 1px 1px 1px rgba(0, 0, 0, 0), 0 0 1px rgba(13, 13, 13, 0);
+ background: rgba(255, 255, 255, 0.8);
+ border-radius: 1.3px;
+ border: 0.2px solid rgba(1, 1, 1, 0);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+ height: 15px;
+ width: 15px;
+ border-radius: 50px;
+ background: #ffc600;
+ cursor: pointer;
+ -webkit-appearance: none;
+ margin-top: -3.5px;
+ box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-moz-range-track {
+ width: 100%;
+ height: 8.4px;
+ cursor: pointer;
+ box-shadow: 1px 1px 1px rgba(0, 0, 0, 0), 0 0 1px rgba(13, 13, 13, 0);
+ background: #ffffff;
+ border-radius: 1.3px;
+ border: 0.2px solid rgba(1, 1, 1, 0);
+}
+
+input[type="range"]::-moz-range-thumb {
+ box-shadow: 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(13, 13, 13, 0);
+ height: 15px;
+ width: 15px;
+ border-radius: 50px;
+ background: #ffc600;
+ cursor: pointer;
+}
+
+/* fullscreen */
+html:-ms-fullscreen {
+ width: 100%;
+}
+:-webkit-full-screen {
+ background-color: transparent;
+}
+/* hide controls on fullscreen with WebKit */
+video::-webkit-media-controls {
+ display: none !important;
+}
+
+video {
+ height: auto;
+}
+
   </style>
 </head>
 
 <body>
-  <div class="code">
-    <video data-dashjs-player autoplay src="dash2/output.mpd" class="video"></video>
-    <div class="controls controls--visible">
+  <div class="player">
+    <video data-dashjs-player autoplay src="dash2/output.mpd" class="player__video viewer"></video>
+    <div class="player__controls player__controls--visible">
       <div class="progress">
         <div class="progress__filled"></div>
       </div>
@@ -136,88 +240,91 @@
         </select>
         <button class="player__button toggleFullscreen" title="Toggle Play">⛶</button>
       </div>
-    </div>
-    <script>
-      const player = document.querySelector(".code");
-      const video = player.querySelector(".video");
-      const controls = player.querySelector(".controls");
-      const progress = player.querySelector(".progress");
-      const progressBar = player.querySelector(".progress__filled");
-      const toggleButton = player.querySelector(".togglePlayback");
-      const volume = player.querySelector(".playerVolume");
-      const speed = player.querySelector(".playerSpeed");
-      const fullscreen = player.querySelector(".toggleFullscreen");
+      <script>
+        /* Get Elements */
+        const player = document.querySelector(".player");
+        const video = player.querySelector(".viewer");
+        const controls = player.querySelector(".player__controls");
+        const progress = player.querySelector(".progress");
+        const progressBar = player.querySelector(".progress__filled");
+        const toggleButton = player.querySelector(".togglePlayback");
+        const volume = player.querySelector(".playerVolume");
+        const speed = player.querySelector(".playerSpeed");
+        const fullscreen = player.querySelector(".toggleFullscreen");
 
-      function togglePlay() {
-        const icon = toggleButton.querySelector(".player__playbackIcon");
-        video.paused ? video.play() : video.pause();
-        icon.classList.toggle("player__playbackIcon--paused");
-      }
+        /* Functions */
+        function togglePlay() {
+          const icon = toggleButton.querySelector(".player__playbackIcon");
+          video.paused ? video.play() : video.pause();
+          icon.classList.toggle("player__playbackIcon--paused");
+        }
 
-      function handleRangeUpdate() {
-        video[this.name] = this.value;
-      }
+        function handleRangeUpdate() {
+          video[this.name] = this.value;
+        }
 
-      function handleProgress() {
-        const percent = video.currentTime / video.duration * 100;
-        progressBar.style.flexBasis = `${percent}%`;
-      }
+        function handleProgress() {
+          const percent = video.currentTime / video.duration * 100;
+          progressBar.style.flexBasis = `${percent}%`;
+        }
 
-      function handleSeek(e) {
-        const seekTime = e.offsetX / progress.offsetWidth * video.duration;
-        video.currentTime = seekTime;
-      }
+        function handleSeek(e) {
+          const seekTime = e.offsetX / progress.offsetWidth * video.duration;
+          video.currentTime = seekTime;
+        }
 
-      // Create fullscreen video button
-      function toggleFullscreen() {
-        if (!document.webkitFullscreenElement) {
-          if (video.requestFullScreen) {
-            player.requestFullScreen();
-          } else if (video.webkitRequestFullScreen) {
-            player.webkitRequestFullScreen();
-          } else if (video.mozRequestFullScreen) {
-            player.mozRequestFullScreen();
+        // Create fullscreen video button
+        function toggleFullscreen() {
+          if (!document.webkitFullscreenElement) {
+            if (video.requestFullScreen) {
+              player.requestFullScreen();
+            } else if (video.webkitRequestFullScreen) {
+              player.webkitRequestFullScreen();
+            } else if (video.mozRequestFullScreen) {
+              player.mozRequestFullScreen();
+            }
+          } else {
+            document.webkitExitFullscreen();
           }
-        } else {
-          document.webkitExitFullscreen();
         }
-      }
 
-      var countrolsHideTimeout;
+        var countrolsHideTimeout;
 
-      function toggleControls() {
-        if (!video.paused) {
+        function toggleControls() {
+          if (!video.paused) {
+            clearTimeout(countrolsHideTimeout);
+            controls.classList.add("player__controls--visible");
+            countrolsHideTimeout = setTimeout(() => {
+              controls.classList.remove("player__controls--visible");
+            }, 3000);
+          }
+        }
+
+        /* Hook up the event listeners */
+
+        video.addEventListener("click", togglePlay);
+        video.addEventListener("timeupdate", handleProgress);
+
+        toggleButton.addEventListener("click", togglePlay);
+        volume.addEventListener("change", handleRangeUpdate);
+        volume.addEventListener("mousemove", handleRangeUpdate);
+        speed.addEventListener("change", handleRangeUpdate);
+
+        let mousedown = false;
+        progress.addEventListener("click", handleSeek);
+        progress.addEventListener("mousemove", e => mousedown && handleSeek(e));
+        progress.addEventListener("mousedown", () => (mousedown = true));
+        progress.addEventListener("mouseup", () => (mousedown = false));
+
+        fullscreen.addEventListener("click", toggleFullscreen);
+        video.addEventListener("dblclick", toggleFullscreen);
+
+        video.addEventListener("mousemove", toggleControls);
+        controls.addEventListener("mouseover", () => {
           clearTimeout(countrolsHideTimeout);
-          controls.classList.add("player__controls--visible");
-          countrolsHideTimeout = setTimeout(() => {
-            controls.classList.remove("player__controls--visible");
-          }, 3000);
-        }
-      }
-
-      video.addEventListener("click", togglePlay);
-      video.addEventListener("timeupdate", handleProgress);
-
-      toggleButton.addEventListener("click", togglePlay);
-      volume.addEventListener("change", handleRangeUpdate);
-      volume.addEventListener("mousemove", handleRangeUpdate);
-      speed.addEventListener("change", handleRangeUpdate);
-
-      let mousedown = false;
-      progress.addEventListener("click", handleSeek);
-      progress.addEventListener("mousemove", e => mousedown && handleSeek(e));
-      progress.addEventListener("mousedown", () => (mousedown = true));
-      progress.addEventListener("mouseup", () => (mousedown = false));
-
-      fullscreen.addEventListener("click", toggleFullscreen);
-      video.addEventListener("dblclick", toggleFullscreen);
-
-      video.addEventListener("mousemove", toggleControls);
-      controls.addEventListener("mouseover", () => {
-        clearTimeout(countrolsHideTimeout);
-      });
-    </script>
-  </div>
+        });
+      </script>
+    </div>
 </body>
 
 </html>
