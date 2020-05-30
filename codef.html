@@ -1,0 +1,43 @@
+<html> 
+  <head> 
+    
+    <script src="http://codef.santo.fr/codef/codef_core.js"></script> 
+    <script src="http://codef.santo.fr/codef/codef_fx.js"></script> 
+    <script> 
+      
+      var myimage = new image('https://essem.space/images/esmglitch128.png');
+      var mycanvas;
+      var myoffscreencanvas;
+      var myfx;
+      var myfxparam=[
+        {value: 0, amp: 30, inc:0.03, offset: -0.05},
+        {value: 0, amp: 30, inc:0.01, offset:  0.08}
+      ];
+      
+      
+      
+      function init(){
+        myoffscreencanvas=new canvas(287,106); // i dont specify a div to make it hidden ;)
+        myimage.draw(myoffscreencanvas,0,0); // I draw my logo to my offscreen canvas.
+        
+        mycanvas=new canvas(640,480,"main");
+        myfx=new FX(myoffscreencanvas,mycanvas,myfxparam);
+        
+        go();
+      }
+      
+      function go(){
+        mycanvas.fill('#000000');
+        myfx.siny(180,180);
+        
+        requestAnimFrame( go );
+      }
+      
+    </script> 
+  </head> 
+  <body onLoad="init();">
+    <br>
+    <br>
+    <center><div id="main"></div><br><br><a href="javascript:window.location='view-source:'+window.location">View Source</a></center>
+  </body> 
+</html>
