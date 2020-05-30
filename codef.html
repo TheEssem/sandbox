@@ -10,14 +10,14 @@
       var myoffscreencanvas;
       var myfx;
       var myfxparam=[
-        {value: 0, amp: 30, inc:0.03, offset: 0},
-        {value: 0, amp: 30, inc:0.01, offset:  0}
+        {value: 0, amp: 30, inc:0.03, offset: -0.05},
+        {value: 0, amp: 30, inc:0.01, offset:  0.08}
       ];
       
       
       
       function init(){
-        myoffscreencanvas=new canvas(287,106); // i dont specify a div to make it hidden ;)
+        myoffscreencanvas=new canvas(128,128); // i dont specify a div to make it hidden ;)
         myimage.draw(myoffscreencanvas,0,0); // I draw my logo to my offscreen canvas.
         
         mycanvas=new canvas(640,480,"main");
